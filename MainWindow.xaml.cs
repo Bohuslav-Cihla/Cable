@@ -25,40 +25,15 @@ namespace Cable
         private List<Cirlce> _circles = new();
 
         private List<Definition> _definitions = new();
-        public class Cirlce
-        {
-            public Double PositionX { get; set; }
-            public Double PositionY { get; set; }
-            public Double Radius { get; set; }
-
-            public bool IsCollision(double secondX, double secondY, double secondRadius)
-            {
-                var test = Math.Sqrt(Math.Pow(PositionX - secondX, 2) + Math.Pow(PositionY - secondY, 2));
-
-                if (test < secondRadius + Radius)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
-
-        public class Coordinates
-        {
-            public double X { get; set; }
-            public double Y { get; set; }
-        }
-
         
         public MainWindow()
         {
-            FillList();
+            FillList(0, 0);
             InitializeComponent();
             ShowCables();
         }
 
-        public void FillList()
+        public void FillList(double positionX, double positionY)
         {
             var diameters = new List<double>()
             {
@@ -77,13 +52,34 @@ namespace Cable
                 2,
             };
             
-            var test = diameters.OrderByDescending(c => c).ToList();
-            
-            for (int k = 0; k < test.Count; k++)
+            var listOfDiameters = diameters.OrderByDescending(c => c).ToList();
+
+            for (double firstX = 0; firstX < listOfDiameters[0]; firstX++)
             {
-                if (!_circles.Any())
+                for (double firstY = 0; firstY < listOfDiameters[0]; firstY++)
                 {
-                    _circles.Add(new Cirlce{PositionX =  18, PositionY = 8, Radius = test[k]/2});
+                    var cableDiameter = CreateCircles(firstX, firstY, listOfDiameters, false);
+            
+                    _definitions.Add(new Definition{FirstX = firstX, FirstY = firstY, CableDiameter = cableDiameter});
+                }
+            }
+
+            var minCableDiameter = _definitions.Min(c=>c.CableDiameter);
+
+            var definition = _definitions.First(d => Math.Abs(d.CableDiameter - minCableDiameter) < 1);
+            
+            var FinalCableDiameter = CreateCircles(definition.FirstX, definition.FirstY, listOfDiameters, true);
+        }
+
+        public double CreateCircles(double positionX, double positionY, List<double> listOfDiameters, bool save)
+        {
+            List<Cirlce> circles = new();
+            
+            for (int k = 0; k < listOfDiameters.Count; k++)
+            {
+                if (!circles.Any())
+                {
+                    circles.Add(new Cirlce{PositionX =  positionX, PositionY = positionY, Radius = listOfDiameters[k]/2});
                 }
                 else
                 {
@@ -97,15 +93,15 @@ namespace Cable
                         {
                             var positon = GetPositon(radius, i);
 
-                            var newCircle = new Cirlce { PositionX = positon.X, PositionY = positon.Y, Radius = test[k] };
+                            var newCircle = new Cirlce { PositionX = positon.X, PositionY = positon.Y, Radius = listOfDiameters[k] };
                         
                             // check if circle is not in collision
 
-                            inCollision = CheckColisionWithOthers(newCircle);
+                            inCollision = CheckColisionWithOthers(newCircle, circles);
 
                             if (!inCollision)
                             {
-                                _circles.Add(newCircle);
+                                circles.Add(newCircle);
                                 break;
                             }
                         }
@@ -113,15 +109,24 @@ namespace Cable
                         radius++;
                     }
                 }
-                
             }
+            
+            // return cover diameter
+            var outerDiameter = circles.Select(circle => BiggestDiameter(circle)).Prepend(0).Max();
+
+            if (save)
+            {
+                _circles.AddRange(circles);
+            }
+
+            return outerDiameter;
         }
 
-        private bool CheckColisionWithOthers(Cirlce newCircle)
+        private bool CheckColisionWithOthers(Cirlce newCircle, List<Cirlce> circles)
         {
-            for (int i = 0; i < _circles.Count; i++)
+            for (int i = 0; i < circles.Count; i++)
             {
-                if (_circles[i].IsCollision(newCircle.PositionX, newCircle.PositionY,
+                if (circles[i].IsCollision(newCircle.PositionX, newCircle.PositionY,
                         newCircle.Radius))
                 {
                     return true;
@@ -208,12 +213,5 @@ namespace Cable
 
             return new Coordinates { X = x, Y = y };
         }
-    }
-
-    internal class Definition
-    {
-        public double FirstX { get; set; }
-        public double FirstY { get; set; }
-        public double CableDiameter { get; set; }
     }
 }

@@ -23,6 +23,8 @@ namespace Cable
     public partial class MainWindow : Window
     {
         private List<Cirlce> _circles = new();
+
+        private List<Definition> _definitions = new();
         public class Cirlce
         {
             public Double PositionX { get; set; }
@@ -58,7 +60,7 @@ namespace Cable
 
         public void FillList()
         {
-            var radiuses = new List<double>()
+            var diameters = new List<double>()
             {
                 7.5,
                 5.0,
@@ -75,13 +77,13 @@ namespace Cable
                 2,
             };
             
-            var test = radiuses.OrderByDescending(c => c).ToList();
+            var test = diameters.OrderByDescending(c => c).ToList();
             
             for (int k = 0; k < test.Count; k++)
             {
                 if (!_circles.Any())
                 {
-                    _circles.Add(new Cirlce{PositionX =  10, PositionY = 10, Radius = test[k]});
+                    _circles.Add(new Cirlce{PositionX =  18, PositionY = 8, Radius = test[k]/2});
                 }
                 else
                 {
@@ -131,8 +133,8 @@ namespace Cable
 
         public void ShowCables()
         {
-            int centerX = 200;
-            int centerY = 100;
+            int centerX = 400;
+            int centerY = 250;
 
             Line lineX = new Line();
             lineX.X1 = centerX - 5;
@@ -164,26 +166,37 @@ namespace Cable
                 MyCanvas.Children.Add(e);
             }
             
-            // find the most distant
-            var cover = _circles.Select(circle => BiggestDiameter(circle)).Prepend(0).Max();
+            // find the biggest distant
+            var coverDiameter = _circles.Select(circle => BiggestDiameter(circle)).Prepend(0).Max();
             
             Ellipse c = new Ellipse();
-            c.Height = cover * 2;
-            c.Width = cover * 2;
+            c.Height = coverDiameter;
+            c.Width = coverDiameter;
                 
             c.Stroke =Brushes.Red;
 
-            Canvas.SetTop(c, centerY - cover); //HERE
-            Canvas.SetLeft(c, centerX- cover);
+            Canvas.SetTop(c, centerY - coverDiameter / 2); //HERE
+            Canvas.SetLeft(c, centerX- coverDiameter / 2);
                 
             MyCanvas.Children.Add(c);
+            
+            // show cover radius
+            
+
+            TextBlock textBlock = new TextBlock();
+            textBlock.Text = $"Diameter of cable is {coverDiameter.ToString()}mm.";
+            //textBlock.Foreground = new SolidColorBrush(color);
+            Canvas.SetLeft(textBlock, 0);
+            Canvas.SetTop(textBlock, 0);
+            MyCanvas.Children.Add(textBlock);
+
         }
 
         public double BiggestDiameter(Cirlce cirlce)
         {
             var c = Math.Sqrt(Math.Pow(cirlce.PositionX, 2) + Math.Pow(cirlce.PositionY, 2));
 
-            return c + cirlce.Radius;
+            return 2 * (c + cirlce.Radius);
         }
         
         public Coordinates GetPositon(double radius, int angle)
@@ -195,5 +208,12 @@ namespace Cable
 
             return new Coordinates { X = x, Y = y };
         }
+    }
+
+    internal class Definition
+    {
+        public double FirstX { get; set; }
+        public double FirstY { get; set; }
+        public double CableDiameter { get; set; }
     }
 }

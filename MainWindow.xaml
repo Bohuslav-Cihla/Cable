@@ -1,0 +1,27 @@
+﻿<Window x:Class="Cable.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Cable"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="250" Width="400">
+    <Grid>
+        
+        <ListView>
+            
+        </ListView>
+        
+        <Canvas Name="MyCanvas" Background="LightGray">
+            <!-- <Ellipse -->
+            <!--     Canvas.Top="50" -->
+            <!--     Canvas.Left="50" -->
+            <!--     Fill="#FFFFFF00" -->
+            <!--     Height="75" -->
+            <!--     Width="75" -->
+            <!--     StrokeThickness="1" -->
+            <!--     Stroke="#FF0000FF"/> -->
+        </Canvas>
+        
+    </Grid>
+</Window>

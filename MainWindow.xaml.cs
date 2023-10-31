@@ -58,41 +58,75 @@ namespace Cable
 
         public void FillList()
         {
-            // var radiuses = new List<double>()
-            // {
-            //     07.5,
-            //     // 05.0,
-            //     // 12.5,
-            //     1,
-            //     // 25,
-            //     // 30,
-            //     // 01.5,
-            //     //86.667,
-            //     // 07.5,
-            //     // 18.0,
-            //     // 27.5,
-            //     // 19,
-            //     // 2,
-            // };
-            //
-            // var test = radiuses.OrderByDescending(c => c).ToList();
-            //
-            // for (int i = 0; i < test.Count; i++)
-            // {
-            //     _circles.Add(new Cirlce{PositionX =  - test[i] / 2 + i*100, PositionY = test[i] / 2 + i*100, Radius = test[i]});
-            // }
-            
-            _circles.Add(new Cirlce{PositionX =  0, PositionY = 0, Radius = 10});
-            // _circles.Add(new Cirlce{PositionX =  55, PositionY = -55, Radius = 20});
-            // _circles.Add(new Cirlce{PositionX =  30, PositionY = 30, Radius = 20});
-
-            for (int i = 0; i < 360; i+=10)
+            var radiuses = new List<double>()
             {
-                var positon = GetPositon(20, i);
-                
-                _circles.Add(new Cirlce{PositionX =  positon.X, PositionY = positon.Y, Radius = 10});
-            }
+                7.5,
+                5.0,
+                12.5,
+                1,
+                25,
+                10,
+                1.5,
+                8.6667,
+                7.5,
+                18.0,
+                7.5,
+                19,
+                2,
+            };
             
+            var test = radiuses.OrderByDescending(c => c).ToList();
+            
+            for (int k = 0; k < test.Count; k++)
+            {
+                if (!_circles.Any())
+                {
+                    _circles.Add(new Cirlce{PositionX =  10, PositionY = 10, Radius = test[k]});
+                }
+                else
+                {
+                    double radius = 0;
+
+                    bool inCollision = true;
+
+                    while (inCollision)
+                    {
+                        for (int i = 0; i < 360; i++)
+                        {
+                            var positon = GetPositon(radius, i);
+
+                            var newCircle = new Cirlce { PositionX = positon.X, PositionY = positon.Y, Radius = test[k] };
+                        
+                            // check if circle is not in collision
+
+                            inCollision = CheckColisionWithOthers(newCircle);
+
+                            if (!inCollision)
+                            {
+                                _circles.Add(newCircle);
+                                break;
+                            }
+                        }
+
+                        radius++;
+                    }
+                }
+                
+            }
+        }
+
+        private bool CheckColisionWithOthers(Cirlce newCircle)
+        {
+            for (int i = 0; i < _circles.Count; i++)
+            {
+                if (_circles[i].IsCollision(newCircle.PositionX, newCircle.PositionY,
+                        newCircle.Radius))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public void ShowCables()
@@ -124,23 +158,32 @@ namespace Cable
                 
                 e.Stroke =Brushes.Black;
 
-                for (int j = 0; j < i; j++)
-                {
-                    if (_circles[i] != _circles[j])
-                    {
-                        if (_circles[i].IsCollision(_circles[j].PositionX, _circles[j].PositionY,
-                                _circles[j].Radius))
-                        {
-                            e.Stroke =Brushes.Red;
-                        }
-                    }
-                }
-
                 Canvas.SetTop(e, centerY - _circles[i].PositionY - _circles[i].Radius); //HERE
                 Canvas.SetLeft(e, centerX + _circles[i].PositionX - _circles[i].Radius);
                 
                 MyCanvas.Children.Add(e);
             }
+            
+            // find the most distant
+            var cover = _circles.Select(circle => BiggestDiameter(circle)).Prepend(0).Max();
+            
+            Ellipse c = new Ellipse();
+            c.Height = cover * 2;
+            c.Width = cover * 2;
+                
+            c.Stroke =Brushes.Red;
+
+            Canvas.SetTop(c, centerY - cover); //HERE
+            Canvas.SetLeft(c, centerX- cover);
+                
+            MyCanvas.Children.Add(c);
+        }
+
+        public double BiggestDiameter(Cirlce cirlce)
+        {
+            var c = Math.Sqrt(Math.Pow(cirlce.PositionX, 2) + Math.Pow(cirlce.PositionY, 2));
+
+            return c + cirlce.Radius;
         }
         
         public Coordinates GetPositon(double radius, int angle)

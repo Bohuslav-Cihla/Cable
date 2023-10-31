@@ -40,8 +40,8 @@ namespace Cable
                 7.5,
                 5.0,
                 12.5,
-                1,
-                25,
+                10,
+                //25,
                 10,
                 1.5,
                 8.6667,
@@ -50,13 +50,14 @@ namespace Cable
                 7.5,
                 19,
                 2,
+                20
             };
             
             var listOfDiameters = diameters.OrderByDescending(c => c).ToList();
 
-            for (double firstX = 0; firstX < listOfDiameters[0]; firstX++)
+            for (double firstX = 0; firstX < listOfDiameters.Max(); firstX++)
             {
-                for (double firstY = 0; firstY < listOfDiameters[0]; firstY++)
+                for (double firstY = 0; firstY < listOfDiameters.Max(); firstY++)
                 {
                     var cableDiameter = CreateCircles(firstX, firstY, listOfDiameters, false);
             
@@ -68,7 +69,7 @@ namespace Cable
 
             var definition = _definitions.First(d => Math.Abs(d.CableDiameter - minCableDiameter) < 1);
             
-            var FinalCableDiameter = CreateCircles(definition.FirstX, definition.FirstY, listOfDiameters, true);
+            var finalCableDiameter = CreateCircles(definition.FirstX, definition.FirstY, listOfDiameters, true);
         }
 
         public double CreateCircles(double positionX, double positionY, List<double> listOfDiameters, bool save)
@@ -93,7 +94,7 @@ namespace Cable
                         {
                             var positon = GetPositon(radius, i);
 
-                            var newCircle = new Cirlce { PositionX = positon.X, PositionY = positon.Y, Radius = listOfDiameters[k] };
+                            var newCircle = new Cirlce { PositionX = positon.X, PositionY = positon.Y, Radius = listOfDiameters[k]/2 };
                         
                             // check if circle is not in collision
 

@@ -1,5 +1,9 @@
-namespace Cable;
+namespace Cable.Models;
 
+
+/// <summary>
+/// Definition class
+/// </summary>
 public class Definition
 {
     public double FirstX { get; set; }
